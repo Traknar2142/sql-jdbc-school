@@ -21,6 +21,11 @@ public class Student {
         this.lastName = LAST_NAMES.get(generateNameIndex());
         this.studentId = id++;
     }
+    public Student(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.studentId = id++;
+    }
     
     public String getFirstName() {
         return firstName;
