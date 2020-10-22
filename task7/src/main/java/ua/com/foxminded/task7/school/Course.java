@@ -3,14 +3,12 @@ package ua.com.foxminded.task7.school;
 import java.util.Random;
 
 public class Course{
-    private static int id = 1;
     private String courceName = "";
-    private int courceId = 0;
     private String courceDescription = "Some description";
+    private int courceId = 0;
 
     public Course(String course) {
         this.courceName = course;
-        this.courceId = id++;
     }
     
     public String getCourceName() {
@@ -19,6 +17,10 @@ public class Course{
     
     public int getCourceId() {
         return courceId;
+    }
+    
+    public void setCourseId(int courceId) {
+        this.courceId = courceId;
     }
     
     public String getCourceDescription() {

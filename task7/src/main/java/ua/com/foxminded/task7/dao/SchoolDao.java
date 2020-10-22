@@ -14,217 +14,115 @@ import ua.com.foxminded.task7.school.Student;
 import ua.com.foxminded.task7.school.TestData;
 
 public class SchoolDao {
-    DaoFactory daoFactory = DaoFactory.getInstance();
-    private static final String TAB = "%-15s";
+    private SingleConnection singleConnection = SingleConnection.getInstance();
 
-    public SchoolDao() throws IOException {
+    public void generateTestData() throws IOException, SQLException {
         TestData testData = new TestData();
         testData.refreshDataBase();
         testData.generateTestData();
     }
-
-    public void addNewStudentIntoDB(String firstName, String lastName) {
-        if (!StringUtils.isAlpha(firstName) || !StringUtils.isAlpha(lastName)) {
-            System.out.println("Please, enter correct data \n" + "You should enter first name and last name in letters");
-            return;
-        }
-        String insertQuery = "insert into school.t_students (student_id, group_id, first_name, last_name) values(?,?,?,?)";
-        try (Connection connection = daoFactory.getConnection();
-                Statement statement = connection.createStatement();
-                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);) {
-            Student student = new Student(firstName, lastName);
-            preparedStatement.setInt(1, student.getStudentId());
-            preparedStatement.setInt(2, student.getGroupId());
-            preparedStatement.setString(3, student.getFirstName());
-            preparedStatement.setString(4, student.getLastName());
-            preparedStatement.executeUpdate();
-            System.out.println("Student has been added");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public String findeGroups(String countOfStudent) throws SQLException {
-        if (!StringUtils.isNumeric(countOfStudent) || StringUtils.isEmpty(countOfStudent)) {
-            return "Please, enter numbers";
-        }
+    
+    public StringBuilder findGroups(String countOfStudent) throws SQLException, IOException {
         int studentCount = Integer.parseInt(countOfStudent);
-        String insertQuery = "select group_name, COUNT(*) as f_count "
-                + "FROM (select * from school.t_groups left join school.t_students on school.t_groups.group_id = school.t_students.group_id) as t_join "
-                + "group by group_name having COUNT(*) <= ? ";
-        StringBuilder result = new StringBuilder(
-                String.format(TAB, "GROUP:") + String.format(TAB, "STUDENTS_COUNT:") + "\n");
         String line = "";
-        try (Connection connection = daoFactory.getConnection();
+        StringBuilder result = new StringBuilder();
+        String insertQuery = "SELECT group_name, "
+                                  + "COUNT(*) AS f_count " 
+                           + "FROM "
+                             + "(SELECT * "
+                             + "FROM t_groups "
+                             + "LEFT JOIN t_students ON t_groups.group_id = t_students.group_id) AS t_join "
+                           + "GROUP BY group_name " 
+                           + "HAVING COUNT(*) <= ?";
+        
+        try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
             preparedStatement.setInt(1, studentCount);
             ResultSet resultSet = preparedStatement.executeQuery();
-            if (!resultSet.next()) {
-                return ("No data");
-            }
+            
             while (resultSet.next()) {
                 String groupName = resultSet.getString(1);
                 int studentsCount = resultSet.getInt(2);
-                line = String.format(TAB, groupName) + String.format(TAB, studentsCount) + "\n";
+                line = String.format("%-15s", groupName) + String.format("%-15s", studentsCount) + "\n";
                 result.append(line);
-            }
-            resultSet.close();
-            return result.toString();
+            }            
+            return result;
         }
     }
-
-    public String findStudents(String courseName) throws SQLException {
-        if (!StringUtils.isAlpha(courseName)) {
-            return "You should enter the name of the course";
-        }
-        String insertQuery = "select first_name, last_name from (" + "select course_name, student_id "
-                + "from school.t_courses join school.t_courses_students on school.t_courses.course_id = school.t_courses_students.course_id "
-                + "where course_name = ? ) as _course_data left join school.t_students on _course_data.student_id = t_students.student_id";
-        StringBuilder result = new StringBuilder(
-                String.format(TAB, "FIRST_NAME:") + String.format(TAB, "LAST_NAME:") + "\n");
-        String line = "";
-        try (Connection connection = daoFactory.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
-            preparedStatement.setString(1, courseName);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (!resultSet.next()) {
-                return ("No data");
-            }
-            while (resultSet.next()) {
-                String firstName = resultSet.getString(1);
-                String lastName = resultSet.getString(2);
-                line = String.format(TAB, firstName) + String.format(TAB, lastName) + "\n";
-                result.append(line);
-            }
-            resultSet.close();
-            return result.toString();
-        }
-    }
-
-    public String deleteStudent(String id) throws SQLException {
-        if (!StringUtils.isNumeric(id) || StringUtils.isEmpty(id)) {
-            return "You should enter ID of student";
-        }
-        int studentId = Integer.parseInt(id);
-        if (!checkStudentInDB(studentId)) {
-            return "Student not found";
-        }
-        String insertQuery = "delete from school.t_students where student_id = ?";
-        try (Connection connection = daoFactory.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
-            preparedStatement.setInt(1, studentId);
-            preparedStatement.executeUpdate();
-            return "Student deleted";
-        }
-    }
-
-    public String addStudentToCourse(String id, String courseName) throws SQLException {
-        if (!StringUtils.isNumeric(id) || StringUtils.isEmpty(id)) {
-            return "You should enter ID of student";
-        }
-        if (!StringUtils.isAlpha(courseName)) {
-            return "You should enter the name of the course";
-        }
-
-        int studentId = Integer.parseInt(id);
-
-        if (!checkStudentInDB(studentId)) {
-            return "Student not found";
-        }
-        if (!checkCourseInDB(courseName)) {
-            return "Group not found";
-        }
-
-        String insertQuery = "insert into school.t_courses_students (student_id, course_id)"
-                + "values(?,(select course_id from school.t_courses where course_name = ?))";
-        try (Connection connection = daoFactory.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
-            preparedStatement.setInt(1, studentId);
-            preparedStatement.setString(2, courseName);
-            preparedStatement.executeUpdate();
-        }
-        return "Student added to a course\n" + printOneStudentCorses(studentId);
-    }
-
-    public String removeFromCourse(String id, String courseName) throws SQLException {
-        if (!StringUtils.isNumeric(id) || StringUtils.isEmpty(id)) {
-            return "You should enter ID of student";
-        }
-        if (!StringUtils.isAlpha(courseName)) {
-            return "You should enter the name of the course";
-        }
-
-        int studentId = Integer.parseInt(id);
-
-        if (!checkStudentInDB(studentId)) {
-            return "Student not found";
-        }
-        if (!checkCourseInDB(courseName)) {
-            return "Group not found";
-        }
-        if (!checkOneStudentCourse(studentId, courseName)) {
-            return "Student not assigned to group " + courseName;
-        }
-
-        String insertQuery = "delete from school.t_courses_students "
-                + "where student_id = ? and course_id = (select course_id from school.t_courses where  course_name = ?)";
-        try (Connection connection = daoFactory.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
-            preparedStatement.setInt(1, studentId);
-            preparedStatement.setString(2, courseName);
-            preparedStatement.executeUpdate();
-        }
-        return "Student removed from a course" + printOneStudentCorses(studentId);
-    }
-
-    private String printOneStudentCorses(int studentId) throws SQLException {
-        String insertQuery = "select distinct course_name from("
-                + "select * from school.t_students left join school.t_courses_students on school.t_students.student_id = school.t_courses_students.student_id "
-                + "where t_students.student_id = ?)"
-                + "as _student_data left join school.t_courses on _student_data.course_id = t_courses.course_id";
-        StringBuilder result = new StringBuilder("List of student's courses:\n");
-        try (Connection connection = daoFactory.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
-            preparedStatement.setInt(1, studentId);
-            ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                String courseName = resultSet.getString(1);
-                result.append(courseName + "\n");
-            }
-            resultSet.close();
-            return result.toString();
-        }
-    }
-
-    public String printTableOfCourses() throws SQLException {
-        String insertQuery = "select * from school.t_courses";
+    
+    public StringBuilder findCourses() throws SQLException, IOException {
+        String insertQuery = "SELECT * "
+                           + "FROM t_courses";
         StringBuilder result = new StringBuilder("");
         String line = "";
-        try (Connection connection = daoFactory.getConnection();
+        
+        try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
             ResultSet resultSet = preparedStatement.executeQuery();
+            
             while (resultSet.next()) {
                 int id = resultSet.getInt(1);
                 String courseName = resultSet.getString(2);
                 String courseDescription = resultSet.getString(3);
-                line = String.format("%-5s", id) + String.format("%-15s", courseName)
-                        + String.format("%-10s", courseDescription) + "\n";
+                line = String.format("%-5s", id) + String.format("%-15s", courseName) + String.format("%-10s", courseDescription) + "\n";
                 result.append(line);
             }
-            resultSet.close();
-            return result.toString();
+            return result;
+        }
+    }    
+
+    public StringBuilder findStudentsRelatedToCourse(String courseName) throws SQLException, IOException {
+        String line = "";
+        StringBuilder result = new StringBuilder();
+        String insertQuery = "SELECT first_name, "
+                                  + "last_name " 
+                           + "FROM"
+                             + "(SELECT course_name, "
+                                     + "student_id "
+                              + "FROM t_courses "
+                              + "JOIN t_courses_students ON t_courses.course_id = t_courses_students.course_id "
+                             + "WHERE course_name = ? ) AS _course_data "
+                           + "LEFT JOIN t_students ON _course_data.student_id = t_students.student_id";
+
+        try (Connection connection = singleConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+            preparedStatement.setString(1, courseName);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                String firstName = resultSet.getString(1);
+                String lastName = resultSet.getString(2);
+                line = String.format("%-15s", firstName) + String.format("%-15s", lastName) + "\n";
+                result.append(line);
+            }
+            return result;
         }
     }
 
-    public String printTableOfStudents() throws SQLException {
-        String insertQuery = "select student_id, first_name, last_name from school.t_students";
-        StringBuilder result = new StringBuilder(String.format("%-5s", "ID:") + String.format("%-15s", "FIRST_NAME:")
-                + String.format("%-10s", "LAST_NAME:") + "\n");
+    public void insertStudent(String firstName, String lastName) throws IOException, SQLException {
+        String insertQuery = "INSERT INTO t_students (group_id, first_name, last_name) VALUES(?,?,?)";
+        try (Connection connection = singleConnection.getConnection();
+                Statement statement = connection.createStatement();
+                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);) {
+            Student student = new Student(firstName, lastName);
+            preparedStatement.setInt(1, student.getGroupId());
+            preparedStatement.setString(2, student.getFirstName());
+            preparedStatement.setString(3, student.getLastName());
+            preparedStatement.executeUpdate();
+        }
+    }
+    
+    public StringBuilder findAllStudents() throws SQLException, IOException {
+        String insertQuery = "SELECT student_id, "
+                                  + "first_name, "
+                                  + "last_name "
+                           + "FROM t_students";
+        StringBuilder result = new StringBuilder();
         String line = "";
-        try (Connection connection = daoFactory.getConnection();
+        
+        try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
             ResultSet resultSet = preparedStatement.executeQuery();
+            
             while (resultSet.next()) {
                 int id = resultSet.getInt(1);
                 String firstName = resultSet.getString(2);
@@ -233,17 +131,59 @@ public class SchoolDao {
                         + "\n";
                 result.append(line);
             }
-            resultSet.close();
-            return result.toString();
+            return result;
         }
     }
 
-    private boolean checkStudentInDB(int id) throws SQLException {
-        String query = "select * from school.t_students where student_id = ?";
-        try (Connection connection = daoFactory.getConnection();
+    public void deleteStudent(int studentId) throws SQLException, IOException {
+        String insertQuery = "DELETE "
+                           + "FROM t_students "
+                           + "WHERE student_id = ?";
+        
+        try (Connection connection = singleConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+            preparedStatement.setInt(1, studentId);
+            preparedStatement.executeUpdate();            
+        }
+    }
+
+    public void addStudentToCourse(int studentId, String courseName) throws SQLException, IOException {
+        String insertQuery = "INSERT INTO t_courses_students (student_id, course_id) "
+                           + "VALUES(?,(SELECT course_id FROM t_courses WHERE course_name = ?))";
+        
+        try (Connection connection = singleConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+            preparedStatement.setInt(1, studentId);
+            preparedStatement.setString(2, courseName);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    public void removeFromCourse(int studentId, String courseName) throws SQLException, IOException {
+        String insertQuery = "DELETE "
+                           + "FROM t_courses_students USING t_courses "
+                           + "WHERE t_courses_students.course_id = t_courses.course_id "
+                             + "AND student_id = ? "
+                             + "AND course_name = ?";
+        
+        try (Connection connection = singleConnection.getConnection();
+                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+            preparedStatement.setInt(1, studentId);
+            preparedStatement.setString(2, courseName);
+            preparedStatement.executeUpdate();
+        }
+    }
+    
+    public boolean checkStudentInDB(int id) throws SQLException, IOException {
+        String query = "SELECT *"
+                     + "FROM t_students "
+                     + "WHERE student_id = ? ";
+        
+        try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
+            
             if (resultSet.next()) {
                 return true;
             }
@@ -251,12 +191,16 @@ public class SchoolDao {
         return false;
     }
 
-    private boolean checkCourseInDB(String courseName) throws SQLException {
-        String query = "select * from school.t_courses where course_name = ?";
-        try (Connection connection = daoFactory.getConnection();
+    public boolean checkCourseInDB(String courseName) throws SQLException, IOException {
+        String query = "SELECT * "
+                     + "FROM t_courses "
+                     + "WHERE course_name = ?";
+        
+        try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, courseName);
             ResultSet resultSet = preparedStatement.executeQuery();
+            
             if (resultSet.next()) {
                 return true;
             }
@@ -264,16 +208,22 @@ public class SchoolDao {
         return false;
     }
 
-    private boolean checkOneStudentCourse(int id, String courseName) throws SQLException {
-        String query = "select distinct course_name from("
-                + "select * from school.t_students left join school.t_courses_students on school.t_students.student_id = school.t_courses_students.student_id "
-                + "where t_students.student_id = ?) "
-                + "as _student_data left join school.t_courses on _student_data.course_id = t_courses.course_id where course_name = ?";
-        try (Connection connection = daoFactory.getConnection();
+    public boolean checkStudentCourseRelation(int id, String courseName) throws SQLException, IOException {
+        String query = "SELECT DISTINCT course_name "
+                     + "FROM "
+                       + "(SELECT * "
+                        + "FROM t_students "
+                        + "LEFT JOIN t_courses_students ON t_students.student_id = t_courses_students.student_id "
+                        + "WHERE t_students.student_id = ?) AS _student_data "
+                     + "LEFT JOIN t_courses ON _student_data.course_id = t_courses.course_id "
+                     + "WHERE course_name = ?";
+        
+        try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, id);
             preparedStatement.setString(2, courseName);
             ResultSet resultSet = preparedStatement.executeQuery();
+            
             if (resultSet.next()) {
                 return true;
             }

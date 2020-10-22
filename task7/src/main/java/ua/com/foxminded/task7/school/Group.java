@@ -3,13 +3,11 @@ package ua.com.foxminded.task7.school;
 import java.util.Random;
 
 public class Group {
-    private static int id = 1;
     private String groupName = "";
     private int groupId = 0;
     
     public Group() {
         this.groupName = generateName();
-        this.groupId = id++;
     }
     
     public String getGroupName() {
@@ -18,6 +16,10 @@ public class Group {
     
     public int getGroupId() {
         return groupId;
+    }
+    
+    public void setGroupId(int groupId) {
+        this.groupId = groupId;
     }
     
     private String generateName() {
