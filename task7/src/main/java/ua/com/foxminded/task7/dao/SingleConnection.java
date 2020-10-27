@@ -21,12 +21,13 @@ public class SingleConnection {
 
     public Connection getConnection() throws IOException, SQLException {
         Properties properties = new Properties();
+        String propertyFileName = "application.properties";
         
-        if(SingleConnection.class.getClassLoader().getResource("application.properties") == null) {
-            throw new FileNotFoundException("File \"application.properties\" not found");
+        if(SingleConnection.class.getClassLoader().getResource(propertyFileName) == null) {
+            throw new FileNotFoundException(propertyFileName);
         }
         
-        properties.load(SingleConnection.class.getClassLoader().getResourceAsStream("application.properties"));
+        properties.load(SingleConnection.class.getClassLoader().getResourceAsStream(propertyFileName));
         
         String url = properties.getProperty("url");
         String user = properties.getProperty("user");

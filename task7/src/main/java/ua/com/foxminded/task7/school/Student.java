@@ -11,11 +11,59 @@ import org.apache.commons.lang3.RandomUtils;
 public class Student {
     private static final List<String> FIRST_NAMES = new ArrayList<>();
     private static final List<String> LAST_NAMES = new ArrayList<>();
-    
-    static {        
+    private String firstName = "";
+    private String lastName = "";
+    private int groupId = 0;
+    private int studentId = 0;
+
+    public Student() {
+        this.firstName = FIRST_NAMES.get(generateNameIndex());
+        this.lastName = LAST_NAMES.get(generateNameIndex());
+    }
+
+    public Student(String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public int getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(int studentId) {
+        this.studentId = studentId;
+    }
+
+    public int getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(int groupId) {
+        this.groupId = groupId;
+    }
+
+    private int generateNameIndex() {
+        int randomNameIndex = 0;
+        int firstIndex = 0;
+        int lastIndex = 19;
+
+        randomNameIndex = firstIndex + (int) (Math.random() * lastIndex);
+
+        return randomNameIndex;
+    }
+
+    static {
         FIRST_NAMES.add("Tyler");
         FIRST_NAMES.add("Grayson");
-        FIRST_NAMES.add("Baldwin");        
+        FIRST_NAMES.add("Baldwin");
         FIRST_NAMES.add("Hadley");
         FIRST_NAMES.add("Lesley");
         FIRST_NAMES.add("Mallory");
@@ -31,10 +79,10 @@ public class Student {
         FIRST_NAMES.add("Brigham");
         FIRST_NAMES.add("Herb");
         FIRST_NAMES.add("Kenelm");
-        FIRST_NAMES.add("Nicholas");        
-        FIRST_NAMES.add("Hadley");        
+        FIRST_NAMES.add("Nicholas");
+        FIRST_NAMES.add("Hadley");
     }
-    
+
     static {
         LAST_NAMES.add("Mitchell");
         LAST_NAMES.add("Bates");
@@ -45,7 +93,7 @@ public class Student {
         LAST_NAMES.add("Rogers");
         LAST_NAMES.add("Chambers");
         LAST_NAMES.add("Gilbert");
-        LAST_NAMES.add("Motley");        
+        LAST_NAMES.add("Motley");
         LAST_NAMES.add("Rose");
         LAST_NAMES.add("Hargraves");
         LAST_NAMES.add("Robbins");
@@ -56,52 +104,5 @@ public class Student {
         LAST_NAMES.add("Nichols");
         LAST_NAMES.add("Haynes");
         LAST_NAMES.add("Meskill");
-    }
-    private String firstName ="";
-    private String lastName = "";
-    private int groupId = 0;
-    private int studentId = 0;
-    
-    public Student() {
-        this.firstName = FIRST_NAMES.get(generateNameIndex());
-        this.lastName = LAST_NAMES.get(generateNameIndex());
-    }
-    public Student(String firstName, String lastName) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-    }
-    
-    public String getFirstName() {
-        return firstName;
-    }
-    
-    public String getLastName() {
-        return lastName;
-    }
-    
-    public int getStudentId() {
-        return studentId;
-    }
-    
-    public void setStudentId(int studentId) {
-        this.studentId = studentId;
-    }
-    
-    public int getGroupId() {
-        return groupId;
-    }
-    
-    public void setGroupId(int groupId) {
-        this.groupId = groupId;
-    }
-    
-    private int generateNameIndex() {
-        int randomNameIndex = 0;
-        int firstIndex = 0;
-        int lastIndex = 19;
-        
-        randomNameIndex = firstIndex + (int)(Math.random() * lastIndex);
-        
-        return randomNameIndex;
     }
 }

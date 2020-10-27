@@ -8,7 +8,7 @@ CREATE TABLE school.t_courses
 (
     course_id SERIAL,
     course_name character varying COLLATE pg_catalog."default" NOT NULL,
-    course_description character varying COLLATE pg_catalog."default" NOT NULL,
+    course_description character varying COLLATE pg_catalog."default",
     CONSTRAINT t_courses_pkey PRIMARY KEY (course_id)
 )
 

@@ -35,9 +35,10 @@ public class TestData {
     SingleConnection singleConnection = SingleConnection.getInstance();
 
     public void refreshDataBase() throws SQLException, IOException{
+        String scriptName = "generateTableScript.sql";
         try (Connection connection = singleConnection.getConnection();
                 Statement statement = connection.createStatement();
-                PreparedStatement preparedStatement = connection.prepareStatement(readQueryFile("generateTable.sql"));) {
+                PreparedStatement preparedStatement = connection.prepareStatement(tableInitialize(scriptName));) {
             preparedStatement.executeUpdate();
         }
     }
@@ -90,8 +91,13 @@ public class TestData {
     }
 
     private void insertGroupsData(List<Group> groups) throws IOException, SQLException {
-        String insertQuery = "INSERT INTO t_groups (group_name) "
-                           + "VALUES(?)";
+        String insertQuery = 
+                "INSERT INTO t_groups\n" + 
+                "    (group_name\n" + 
+                "    )\n" + 
+                "    VALUES\n" + 
+                "    (?\n" + 
+                "    )";
         try (Connection connection = singleConnection.getConnection();
                 Statement statement = connection.createStatement();
                 PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);) {
@@ -103,22 +109,24 @@ public class TestData {
     }
 
     private void setGroupIdIntoGroups(List<Group> groups) throws SQLException, IOException {
-        int id;
-
         for (Group group : groups) {
-            id = getGroupIdFromDB(group.getGroupName());
+            int id = getGroupIdFromDB(group.getGroupName());
             group.setGroupId(id);
         }
     }
 
     private int getGroupIdFromDB(String groupName) throws SQLException, IOException {
-        String query = "SELECT group_id "
-                     + "FROM school.t_groups "
-                     + "WHERE group_name = ?";
-        String id = "";
+        String query = 
+                "SELECT\n" + 
+                "    group_id\n" + 
+                "FROM\n" + 
+                "    school.t_groups\n" + 
+                "WHERE\n" + 
+                "    group_name = ?";
         
         try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            String id = "";
             preparedStatement.setString(1, groupName);
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -146,8 +154,17 @@ public class TestData {
     }
 
     private void insertStudentsData(List<Student> students) throws IOException, SQLException {
-        String insertQuery = "INSERT INTO school.t_students (group_id, first_name, last_name) "
-                           + "VALUES(?,?,?)";
+        String insertQuery = 
+                "INSERT INTO school.t_students\n" + 
+                "    (group_id\n" + 
+                "      , first_name\n" + 
+                "      , last_name\n" + 
+                "    )\n" + 
+                "    VALUES\n" + 
+                "    (?\n" + 
+                "      , ?\n" + 
+                "      , ?\n" + 
+                "    )";
         
         try (Connection connection = singleConnection.getConnection();
                 Statement statement = connection.createStatement();
@@ -163,17 +180,19 @@ public class TestData {
     }
 
     private void setStudentIdIntoStudents(List<Student> students) throws SQLException, IOException {
-        String query = "SELECT student_id "
-                     + "FROM school.t_students";
-        int id = 0;
+        String query = 
+                "SELECT\n" + 
+                "    student_id\n" + 
+                "FROM\n" + 
+                "    school.t_students";
         int count = 0;
-        
+
         try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
-                id = resultSet.getInt(1);
+                int id = resultSet.getInt(1);
                 students.get(count).setStudentId(id);
                 count++;
             }
@@ -181,34 +200,41 @@ public class TestData {
     }
 
     private void insertCoursesData(List<Course> courses) throws IOException, SQLException {
-        String insertQuery = "INSERT INTO school.t_courses (course_name, course_description) "
-                           + "VALUES(?,?)";
+        String insertQuery = 
+                "INSERT INTO school.t_courses\n" + 
+                "    (course_name\n" + 
+                "    )\n" + 
+                "    VALUES\n" + 
+                "    (?\n" + 
+                "    )";
         try (Connection connection = singleConnection.getConnection();
                 Statement statement = connection.createStatement();
                 PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);) {
             for (Course course : courses) {
                 preparedStatement.setString(1, course.getCourceName());
-                preparedStatement.setString(2, course.getCourceDescription());
                 preparedStatement.executeUpdate();
             }
         }
     }
 
     private void setCourseIdIntoCourses(List<Course> courses) throws SQLException, IOException {
-        int id;
         for (Course course : courses) {
-            id = getCourseIdFromDB(course.getCourceName());
+            int id = getCourseIdFromDB(course.getCourceName());
             course.setCourseId(id);
         }
     }
 
     private int getCourseIdFromDB(String courseName) throws SQLException, IOException {
-        String query = "SELECT course_id "
-                     + "FROM school.t_courses "
-                     + "WHERE course_name = ?";
-        String id = null;
+        String query = 
+                "SELECT\n" + 
+                "    course_id\n" + 
+                "FROM\n" + 
+                "    school.t_courses\n" + 
+                "WHERE\n" + 
+                "    course_name = ?";
         try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+            String id = "";
             preparedStatement.setString(1, courseName);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -219,8 +245,15 @@ public class TestData {
     }
 
     private void insertIdData(List<Student> students, List<Course> courses) throws IOException, SQLException {
-        String insertQuery = "INSERT INTO school.t_courses_students (student_id, course_id) "
-                           + "VALUES(?,?)";
+        String insertQuery = 
+                "INSERT INTO school.t_courses_students\n" + 
+                "    (student_id\n" + 
+                "      , course_id\n" + 
+                "    )\n" + 
+                "    VALUES\n" + 
+                "    (?\n" + 
+                "      , ?\n" + 
+                "    )";
         try (Connection connection = singleConnection.getConnection();
                 Statement statement = connection.createStatement();
                 PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);) {
@@ -240,20 +273,20 @@ public class TestData {
 
     private List<Integer> getRandomCoursesId(List<Course> courses, int selection) {
         Random rand = new Random();
-        List<Course> modified—ourses = new ArrayList<Course>(courses);
+        List<Course> modifiedCourses = new ArrayList<Course>(courses);
         List<Integer> idOfCourses = new ArrayList<Integer>();
         for (int i = 0; i < selection; i++) {
-            int randomIndex = rand.nextInt(modified—ourses.size());
-            idOfCourses.add(modified—ourses.get(randomIndex).getCourceId());
-            modified—ourses.remove(randomIndex);
+            int randomIndex = rand.nextInt(modifiedCourses.size());
+            idOfCourses.add(modifiedCourses.get(randomIndex).getCourceId());
+            modifiedCourses.remove(randomIndex);
         }
         return idOfCourses;
     }
 
-    private String readQueryFile(String file) throws IOException {
+    private String tableInitialize(String file) throws IOException {
         ClassLoader classLoader = getClass().getClassLoader();
-        if(classLoader.getResource(file) == null) {
-            throw new FileNotFoundException("File "+ file + " not found");
+        if (classLoader.getResource(file) == null) {
+            throw new FileNotFoundException(file);
         }
         File resource = new File(classLoader.getResource(file).getFile());
         StringBuilder query = new StringBuilder();

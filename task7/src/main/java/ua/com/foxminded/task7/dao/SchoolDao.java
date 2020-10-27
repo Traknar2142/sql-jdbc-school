@@ -24,74 +24,87 @@ public class SchoolDao {
     
     public StringBuilder findGroups(String countOfStudent) throws SQLException, IOException {
         int studentCount = Integer.parseInt(countOfStudent);
-        String line = "";
         StringBuilder result = new StringBuilder();
-        String insertQuery = "SELECT group_name, "
-                                  + "COUNT(*) AS f_count " 
-                           + "FROM "
-                             + "(SELECT * "
-                             + "FROM t_groups "
-                             + "LEFT JOIN t_students ON t_groups.group_id = t_students.group_id) AS t_join "
-                           + "GROUP BY group_name " 
-                           + "HAVING COUNT(*) <= ?";
+        String insertQuery =                 
+                "SELECT\n" + 
+                "    group_name\n" + 
+                "  , COUNT(*) AS f_count\n" + 
+                "FROM\n" + 
+                "    t_groups\n" + 
+                "    LEFT JOIN\n" + 
+                "        t_students\n" + 
+                "        ON\n" + 
+                "            t_groups.group_id = t_students.group_id\n" + 
+                "GROUP BY\n" + 
+                "    group_name\n" + 
+                "HAVING\n" + 
+                "    COUNT(*) <= ?";
         
         try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
             preparedStatement.setInt(1, studentCount);
             ResultSet resultSet = preparedStatement.executeQuery();
-            
+
             while (resultSet.next()) {
                 String groupName = resultSet.getString(1);
                 int studentsCount = resultSet.getInt(2);
-                line = String.format("%-15s", groupName) + String.format("%-15s", studentsCount) + "\n";
+                String line = String.format("%-15s", groupName) + String.format("%-15s", studentsCount) + "\n";
                 result.append(line);
-            }            
+            }
             return result;
         }
     }
     
     public StringBuilder findCourses() throws SQLException, IOException {
-        String insertQuery = "SELECT * "
-                           + "FROM t_courses";
+        String insertQuery = 
+                "SELECT *\n" + 
+                "FROM\n" + 
+                "    t_courses";
         StringBuilder result = new StringBuilder("");
-        String line = "";
         
         try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
             ResultSet resultSet = preparedStatement.executeQuery();
-            
+
             while (resultSet.next()) {
                 int id = resultSet.getInt(1);
                 String courseName = resultSet.getString(2);
                 String courseDescription = resultSet.getString(3);
-                line = String.format("%-5s", id) + String.format("%-15s", courseName) + String.format("%-10s", courseDescription) + "\n";
+                String line = String.format("%-5s", id) + String.format("%-15s", courseName) + String.format("%-10s", courseDescription) + "\n";
                 result.append(line);
             }
             return result;
         }
-    }    
+    } 
 
     public StringBuilder findStudentsRelatedToCourse(String courseName) throws SQLException, IOException {
-        String line = "";
         StringBuilder result = new StringBuilder();
-        String insertQuery = "SELECT first_name, "
-                                  + "last_name " 
-                           + "FROM"
-                             + "(SELECT course_name, "
-                                     + "student_id "
-                              + "FROM t_courses "
-                              + "JOIN t_courses_students ON t_courses.course_id = t_courses_students.course_id "
-                             + "WHERE course_name = ? ) AS _course_data "
-                           + "LEFT JOIN t_students ON _course_data.student_id = t_students.student_id";
+        String insertQuery = 
+                "SELECT\n" + 
+                "    first_name\n" + 
+                "  , last_name\n" + 
+                "FROM\n" + 
+                "    t_courses\n" + 
+                "    JOIN\n" + 
+                "        t_courses_students\n" + 
+                "        ON\n" + 
+                "            t_courses.course_id = t_courses_students.course_id\n" + 
+                "    LEFT JOIN\n" + 
+                "        t_students\n" + 
+                "        ON\n" + 
+                "            t_courses_students.student_id = t_students.student_id\n" + 
+                "WHERE\n" + 
+                "    course_name = ?";
 
         try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
             preparedStatement.setString(1, courseName);
             ResultSet resultSet = preparedStatement.executeQuery();
+
             while (resultSet.next()) {
                 String firstName = resultSet.getString(1);
                 String lastName = resultSet.getString(2);
-                line = String.format("%-15s", firstName) + String.format("%-15s", lastName) + "\n";
+                String line = String.format("%-15s", firstName) + String.format("%-15s", lastName) + "\n";
                 result.append(line);
             }
             return result;
@@ -112,23 +125,24 @@ public class SchoolDao {
     }
     
     public StringBuilder findAllStudents() throws SQLException, IOException {
-        String insertQuery = "SELECT student_id, "
-                                  + "first_name, "
-                                  + "last_name "
-                           + "FROM t_students";
+        String insertQuery = 
+                "SELECT\n" + 
+                "    student_id\n" + 
+                "  , first_name\n" + 
+                "  , last_name\n" + 
+                "FROM\n" + 
+                "    t_students";
         StringBuilder result = new StringBuilder();
-        String line = "";
-        
+
         try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
             ResultSet resultSet = preparedStatement.executeQuery();
-            
+
             while (resultSet.next()) {
                 int id = resultSet.getInt(1);
                 String firstName = resultSet.getString(2);
                 String lastName = resultSet.getString(3);
-                line = String.format("%-5s", id) + String.format("%-15s", firstName) + String.format("%-10s", lastName)
-                        + "\n";
+                String line = String.format("%-5s", id) + String.format("%-15s", firstName) + String.format("%-10s", lastName) + "\n";
                 result.append(line);
             }
             return result;
@@ -136,20 +150,37 @@ public class SchoolDao {
     }
 
     public void deleteStudent(int studentId) throws SQLException, IOException {
-        String insertQuery = "DELETE "
-                           + "FROM t_students "
-                           + "WHERE student_id = ?";
+        String insertQuery = 
+                "DELETE\n" + 
+                "FROM\n" + 
+                "    t_students\n" + 
+                "WHERE\n" + 
+                "    student_id = ?";
         
         try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
             preparedStatement.setInt(1, studentId);
-            preparedStatement.executeUpdate();            
+            preparedStatement.executeUpdate();
         }
     }
 
     public void addStudentToCourse(int studentId, String courseName) throws SQLException, IOException {
-        String insertQuery = "INSERT INTO t_courses_students (student_id, course_id) "
-                           + "VALUES(?,(SELECT course_id FROM t_courses WHERE course_name = ?))";
+        String insertQuery = 
+                "INSERT INTO t_courses_students\n" + 
+                "    (student_id\n" + 
+                "      , course_id\n" + 
+                "    )\n" + 
+                "    VALUES\n" + 
+                "    (?\n" + 
+                "      , (\n" + 
+                "            SELECT\n" + 
+                "                course_id\n" + 
+                "            FROM\n" + 
+                "                t_courses\n" + 
+                "            WHERE\n" + 
+                "                course_name = ?\n" + 
+                "        )\n" + 
+                "    )";
         
         try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
@@ -160,11 +191,15 @@ public class SchoolDao {
     }
 
     public void removeFromCourse(int studentId, String courseName) throws SQLException, IOException {
-        String insertQuery = "DELETE "
-                           + "FROM t_courses_students USING t_courses "
-                           + "WHERE t_courses_students.course_id = t_courses.course_id "
-                             + "AND student_id = ? "
-                             + "AND course_name = ?";
+        String insertQuery = 
+                "DELETE\n" + 
+                "FROM\n" + 
+                "    t_courses_students\n" + 
+                "USING t_courses\n" + 
+                "WHERE\n" + 
+                "    t_courses_students.course_id = t_courses.course_id\n" + 
+                "    AND student_id = ?\n" + 
+                "    AND course_name = ?";
         
         try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
@@ -175,15 +210,18 @@ public class SchoolDao {
     }
     
     public boolean checkStudentInDB(int id) throws SQLException, IOException {
-        String query = "SELECT *"
-                     + "FROM t_students "
-                     + "WHERE student_id = ? ";
+        String query = 
+                "SELECT *\n" + 
+                "FROM\n" + 
+                "    t_students\n" + 
+                "WHERE\n" + 
+                "    student_id = ?";
         
         try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
-            
+
             if (resultSet.next()) {
                 return true;
             }
@@ -192,15 +230,18 @@ public class SchoolDao {
     }
 
     public boolean checkCourseInDB(String courseName) throws SQLException, IOException {
-        String query = "SELECT * "
-                     + "FROM t_courses "
-                     + "WHERE course_name = ?";
+        String query = 
+                "SELECT *\n" + 
+                "FROM\n" + 
+                "    t_courses\n" + 
+                "WHERE\n" + 
+                "    course_name = ?";
         
         try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, courseName);
             ResultSet resultSet = preparedStatement.executeQuery();
-            
+
             if (resultSet.next()) {
                 return true;
             }
@@ -209,21 +250,29 @@ public class SchoolDao {
     }
 
     public boolean checkStudentCourseRelation(int id, String courseName) throws SQLException, IOException {
-        String query = "SELECT DISTINCT course_name "
-                     + "FROM "
-                       + "(SELECT * "
-                        + "FROM t_students "
-                        + "LEFT JOIN t_courses_students ON t_students.student_id = t_courses_students.student_id "
-                        + "WHERE t_students.student_id = ?) AS _student_data "
-                     + "LEFT JOIN t_courses ON _student_data.course_id = t_courses.course_id "
-                     + "WHERE course_name = ?";
+        String query = 
+                "SELECT DISTINCT\n" + 
+                "    course_name\n" + 
+                "FROM\n" + 
+                "    t_students\n" + 
+                "    LEFT JOIN\n" + 
+                "        t_courses_students\n" + 
+                "        ON\n" + 
+                "            t_students.student_id = t_courses_students.student_id\n" + 
+                "    LEFT JOIN\n" + 
+                "        t_courses\n" + 
+                "        ON\n" + 
+                "            t_courses_students.course_id = t_courses.course_id\n" + 
+                "WHERE\n" + 
+                "    course_name = 'biology'\n" + 
+                "    and t_students.student_id = 7";
         
         try (Connection connection = singleConnection.getConnection();
                 PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, id);
             preparedStatement.setString(2, courseName);
             ResultSet resultSet = preparedStatement.executeQuery();
-            
+
             if (resultSet.next()) {
                 return true;
             }
