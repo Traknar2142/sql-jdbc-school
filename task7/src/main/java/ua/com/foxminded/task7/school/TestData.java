@@ -120,7 +120,7 @@ public class TestData {
                 "SELECT\n" + 
                 "    group_id\n" + 
                 "FROM\n" + 
-                "    school.t_groups\n" + 
+                "    t_groups\n" + 
                 "WHERE\n" + 
                 "    group_name = ?";
         
@@ -155,7 +155,7 @@ public class TestData {
 
     private void insertStudentsData(List<Student> students) throws IOException, SQLException {
         String insertQuery = 
-                "INSERT INTO school.t_students\n" + 
+                "INSERT INTO t_students\n" + 
                 "    (group_id\n" + 
                 "      , first_name\n" + 
                 "      , last_name\n" + 
@@ -184,7 +184,7 @@ public class TestData {
                 "SELECT\n" + 
                 "    student_id\n" + 
                 "FROM\n" + 
-                "    school.t_students";
+                "    t_students";
         int count = 0;
 
         try (Connection connection = singleConnection.getConnection();
@@ -201,7 +201,7 @@ public class TestData {
 
     private void insertCoursesData(List<Course> courses) throws IOException, SQLException {
         String insertQuery = 
-                "INSERT INTO school.t_courses\n" + 
+                "INSERT INTO t_courses\n" + 
                 "    (course_name\n" + 
                 "    )\n" + 
                 "    VALUES\n" + 
@@ -229,7 +229,7 @@ public class TestData {
                 "SELECT\n" + 
                 "    course_id\n" + 
                 "FROM\n" + 
-                "    school.t_courses\n" + 
+                "    t_courses\n" + 
                 "WHERE\n" + 
                 "    course_name = ?";
         try (Connection connection = singleConnection.getConnection();
@@ -246,7 +246,7 @@ public class TestData {
 
     private void insertIdData(List<Student> students, List<Course> courses) throws IOException, SQLException {
         String insertQuery = 
-                "INSERT INTO school.t_courses_students\n" + 
+                "INSERT INTO t_courses_students\n" + 
                 "    (student_id\n" + 
                 "      , course_id\n" + 
                 "    )\n" + 
