@@ -1,7 +1,7 @@
 package ua.com.foxminded.task7.school;
 
 public class Course {
-    private String courceName = "";
+    private String courceName;
     private String courceDescription;
     private int courceId = 0;
 

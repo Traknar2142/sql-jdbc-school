@@ -14,18 +14,22 @@ import ua.com.foxminded.task7.school.Student;
 import ua.com.foxminded.task7.school.TestData;
 
 public class SchoolDao {
-    private SingleConnection singleConnection = SingleConnection.getInstance();
+    SingleConnection singleConnection;
+
+    public SchoolDao(SingleConnection connection) {
+        this.singleConnection = connection;
+    }
 
     public void generateTestData() throws IOException, SQLException {
         TestData testData = new TestData();
-        testData.refreshDataBase();
+        testData.generateNewDataTables();
         testData.generateTestData();
     }
-    
+
     public StringBuilder findGroups(String countOfStudent) throws SQLException, IOException {
         int studentCount = Integer.parseInt(countOfStudent);
         StringBuilder result = new StringBuilder();
-        String insertQuery =                 
+        String query =                 
                 "SELECT\n" + 
                 "    group_name\n" + 
                 "  , COUNT(*) AS f_count\n" + 
@@ -41,7 +45,7 @@ public class SchoolDao {
                 "    COUNT(*) <= ?";
         
         try (Connection connection = singleConnection.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, studentCount);
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -56,14 +60,14 @@ public class SchoolDao {
     }
     
     public StringBuilder findCourses() throws SQLException, IOException {
-        String insertQuery = 
+        String query = 
                 "SELECT *\n" + 
                 "FROM\n" + 
                 "    t_courses";
         StringBuilder result = new StringBuilder("");
         
         try (Connection connection = singleConnection.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
@@ -79,7 +83,7 @@ public class SchoolDao {
 
     public StringBuilder findStudentsRelatedToCourse(String courseName) throws SQLException, IOException {
         StringBuilder result = new StringBuilder();
-        String insertQuery = 
+        String query = 
                 "SELECT\n" + 
                 "    first_name\n" + 
                 "  , last_name\n" + 
@@ -97,7 +101,7 @@ public class SchoolDao {
                 "    course_name = ?";
 
         try (Connection connection = singleConnection.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, courseName);
             ResultSet resultSet = preparedStatement.executeQuery();
 
@@ -112,10 +116,9 @@ public class SchoolDao {
     }
 
     public void insertStudent(String firstName, String lastName) throws IOException, SQLException {
-        String insertQuery = "INSERT INTO t_students (group_id, first_name, last_name) VALUES(?,?,?)";
+        String query = "INSERT INTO t_students (group_id, first_name, last_name) VALUES(?,?,?)";
         try (Connection connection = singleConnection.getConnection();
-                Statement statement = connection.createStatement();
-                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);) {
+                PreparedStatement preparedStatement = connection.prepareStatement(query);) {
             Student student = new Student(firstName, lastName);
             preparedStatement.setInt(1, student.getGroupId());
             preparedStatement.setString(2, student.getFirstName());
@@ -125,7 +128,7 @@ public class SchoolDao {
     }
     
     public StringBuilder findAllStudents() throws SQLException, IOException {
-        String insertQuery = 
+        String query = 
                 "SELECT\n" + 
                 "    student_id\n" + 
                 "  , first_name\n" + 
@@ -135,7 +138,7 @@ public class SchoolDao {
         StringBuilder result = new StringBuilder();
 
         try (Connection connection = singleConnection.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()) {
@@ -150,7 +153,7 @@ public class SchoolDao {
     }
 
     public void deleteStudent(int studentId) throws SQLException, IOException {
-        String insertQuery = 
+        String query = 
                 "DELETE\n" + 
                 "FROM\n" + 
                 "    t_students\n" + 
@@ -158,14 +161,14 @@ public class SchoolDao {
                 "    student_id = ?";
         
         try (Connection connection = singleConnection.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, studentId);
             preparedStatement.executeUpdate();
         }
     }
 
     public void addStudentToCourse(int studentId, String courseName) throws SQLException, IOException {
-        String insertQuery = 
+        String query = 
                 "INSERT INTO t_courses_students\n" + 
                 "    (student_id\n" + 
                 "      , course_id\n" + 
@@ -183,7 +186,7 @@ public class SchoolDao {
                 "    )";
         
         try (Connection connection = singleConnection.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, studentId);
             preparedStatement.setString(2, courseName);
             preparedStatement.executeUpdate();
@@ -191,7 +194,7 @@ public class SchoolDao {
     }
 
     public void removeFromCourse(int studentId, String courseName) throws SQLException, IOException {
-        String insertQuery = 
+        String query = 
                 "DELETE\n" + 
                 "FROM\n" + 
                 "    t_courses_students\n" + 
@@ -202,7 +205,7 @@ public class SchoolDao {
                 "    AND course_name = ?";
         
         try (Connection connection = singleConnection.getConnection();
-                PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+                PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setInt(1, studentId);
             preparedStatement.setString(2, courseName);
             preparedStatement.executeUpdate();

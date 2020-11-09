@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 import ua.com.foxminded.task7.dao.SingleConnection;
 
 public class TestData {
-    static List<String> courseNames = new ArrayList<>();
+    private static List<String> courseNames = new ArrayList<>();
     
     static {
         courseNames.add("biology");
@@ -34,7 +34,7 @@ public class TestData {
     
     SingleConnection singleConnection = SingleConnection.getInstance();
 
-    public void refreshDataBase() throws SQLException, IOException{
+    public void generateNewDataTables() throws SQLException, IOException{
         String scriptName = "generateTableScript.sql";
         try (Connection connection = singleConnection.getConnection();
                 Statement statement = connection.createStatement();

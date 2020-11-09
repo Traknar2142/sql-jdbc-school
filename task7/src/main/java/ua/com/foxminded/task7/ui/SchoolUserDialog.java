@@ -12,6 +12,7 @@ import java.util.concurrent.Callable;
 import org.apache.commons.lang3.StringUtils;
 
 import ua.com.foxminded.task7.dao.SchoolDao;
+import ua.com.foxminded.task7.dao.SingleConnection;
 
 public class SchoolUserDialog {
     private static final String WELCOME_MESSAGE = "Write \"a\" if you want find all groups with less or equals student count\n"
@@ -19,8 +20,9 @@ public class SchoolUserDialog {
             + "Write \"c\" if you want add new student\n" + "Write \"d\" if you want delete student by STUDENT_ID\n"
             + "Write \"e\" if you want add a student to the course (from a list)\n"
             + "Write \"f\" if you want remove the student from one of his or her courses\n";
+    SingleConnection singleConnection = SingleConnection.getInstance();
     
-    private SchoolDao dao = new SchoolDao();
+    private SchoolDao dao = new SchoolDao(singleConnection);
     private BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     private Map<String, Callable<String>> mainMenu = new HashMap<String, Callable<String>>();
 

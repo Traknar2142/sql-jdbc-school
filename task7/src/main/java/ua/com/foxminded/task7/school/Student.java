@@ -11,10 +11,10 @@ import org.apache.commons.lang3.RandomUtils;
 public class Student {
     private static final List<String> FIRST_NAMES = new ArrayList<>();
     private static final List<String> LAST_NAMES = new ArrayList<>();
-    private String firstName = "";
-    private String lastName = "";
-    private int groupId = 0;
-    private int studentId = 0;
+    private String firstName;
+    private String lastName;
+    private int groupId;
+    private int studentId;
 
     public Student() {
         this.firstName = FIRST_NAMES.get(generateNameIndex());

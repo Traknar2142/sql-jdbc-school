@@ -3,8 +3,8 @@ package ua.com.foxminded.task7.school;
 import java.util.Random;
 
 public class Group {
-    private String groupName = "";
-    private int groupId = 0;
+    private String groupName;
+    private int groupId;
 
     public Group() {
         this.groupName = generateName();
