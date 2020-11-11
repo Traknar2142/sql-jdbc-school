@@ -34,6 +34,6 @@ public class SchoolApp {
         } catch (Exception e) {
             e.getMessage();
             e.printStackTrace();
-        }        
+        }
     }
 }
