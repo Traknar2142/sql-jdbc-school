@@ -20,22 +20,20 @@ public class SchoolApp {
         try {
             school.generateTestData();
             schoolUserDialog.getAppMenu();
+        } catch (SQLException e) {
+            System.err.println("Can't read the query \n" + e.getMessage());
+            e.printStackTrace();
+
+        } catch (FileNotFoundException e) {
+            System.err.println("File " + e.getMessage() + " not found");
+            e.printStackTrace();
+
+        } catch (IOException e) {
+            System.err.println("Can't read the file");
+            e.printStackTrace();
         } catch (Exception e) {
-            if (e instanceof SQLException) {
-                SQLException sqle = (SQLException) e;
-                System.err.println("Can't read the query \n" + sqle.getMessage());
-                sqle.printStackTrace();
-
-            } else if (e instanceof FileNotFoundException) {
-                FileNotFoundException fnfe = (FileNotFoundException) e;
-                System.err.println("File " + fnfe.getMessage() + " not found");
-                fnfe.printStackTrace();
-
-            } else if (e instanceof IOException) {
-                IOException ioe = (IOException) e;
-                System.err.println("Can't read the file");
-                ioe.printStackTrace();
-            }
-        }
+            e.getMessage();
+            e.printStackTrace();
+        }        
     }
 }
