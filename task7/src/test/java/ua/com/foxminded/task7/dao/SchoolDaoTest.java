@@ -2,7 +2,10 @@ package ua.com.foxminded.task7.dao;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+
+import ua.com.foxminded.task7.school.TestData;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -16,6 +19,7 @@ public class SchoolDaoTest {
     PreparedStatement preparedStatement = Mockito.mock(PreparedStatement.class);
     Connection jdbcConnection = Mockito.mock(Connection.class);
     SingleConnection connection = Mockito.mock(SingleConnection.class);
+    TestData testData = Mockito.mock(TestData.class);
     SchoolDao dao = new SchoolDao(connection);
 
     String testCourseName = "testCourseName";
@@ -46,7 +50,7 @@ public class SchoolDaoTest {
     }
 
     @Test
-    public void findCourses_ShoudReturnFormatedString() throws SQLException, IOException {
+    public void findCourses_ShoudReturnFormatedString_WhenMethodCall() throws SQLException, IOException {
 
         Mockito.when(resultSet.next()).thenReturn(true).thenReturn(false);
         Mockito.when(resultSet.getInt(1)).thenReturn(testNumber);
@@ -63,7 +67,7 @@ public class SchoolDaoTest {
     }
 
     @Test
-    public void findStudentsRelatedToCourse_ShoudReturnFormatedString() throws SQLException, IOException {
+    public void findStudentsRelatedToCourse_ShoudReturnFormatedString_WhenInputCourseName() throws SQLException, IOException {
 
         Mockito.when(resultSet.next()).thenReturn(true).thenReturn(false);
         Mockito.when(resultSet.getString(1)).thenReturn(testFirstName);
@@ -95,7 +99,7 @@ public class SchoolDaoTest {
     }
     
     @Test
-    public void findAllStudents_ShoudReturnFormatedString() throws SQLException, IOException {
+    public void findAllStudents_ShoudReturnFormatedString_WhenMethodCall() throws SQLException, IOException {
 
         Mockito.when(resultSet.next()).thenReturn(true).thenReturn(false);
         Mockito.when(resultSet.getInt(1)).thenReturn(testId);
@@ -159,7 +163,7 @@ public class SchoolDaoTest {
     }
 
     @Test
-    public void checkStudentInDB_ShoudReturnTrue() throws SQLException, IOException {
+    public void checkStudentInDB_ShoudReturnTrue_WhenPrStatementReturnTrue() throws SQLException, IOException {
 
         Mockito.when(resultSet.next()).thenReturn(true).thenReturn(false);
         Mockito.when(resultSet.getString(1)).thenReturn(someResult);
@@ -172,7 +176,7 @@ public class SchoolDaoTest {
     }
 
     @Test
-    public void checkStudentInDB_ShoudReturnFalse() throws SQLException, IOException {
+    public void checkStudentInDB_ShoudReturnFalse_WhenPrStatementReturnFalse() throws SQLException, IOException {
 
         Mockito.when(resultSet.next()).thenReturn(false);
 
@@ -184,7 +188,7 @@ public class SchoolDaoTest {
     }
 
     @Test
-    public void checkCourseInDB_ShoudReturnTrue() throws SQLException, IOException {
+    public void checkCourseInDB_ShoudReturnTrue_WhenResultsetReturnTrue() throws SQLException, IOException {
 
         Mockito.when(resultSet.next()).thenReturn(true).thenReturn(false);
         Mockito.when(resultSet.getString(1)).thenReturn(someResult);
@@ -197,7 +201,7 @@ public class SchoolDaoTest {
     }
 
     @Test
-    public void checkCourseInDB_ShoudReturnFalse() throws SQLException, IOException {
+    public void checkCourseInDB_ShoudReturnFalse_WhenResultsetReturnFalse() throws SQLException, IOException {
 
         Mockito.when(resultSet.next()).thenReturn(false);
 
@@ -209,7 +213,7 @@ public class SchoolDaoTest {
     }
 
     @Test
-    public void checkStudentCourseRelation_ShoudReturnTrue() throws SQLException, IOException {
+    public void checkStudentCourseRelation_ShoudReturnTrue_WhenResultsetReturnTrue() throws SQLException, IOException {
 
         Mockito.when(resultSet.next()).thenReturn(true).thenReturn(false);
 
@@ -221,7 +225,7 @@ public class SchoolDaoTest {
     }
 
     @Test
-    public void checkStudentCourseRelation_ShoudReturnFalse() throws SQLException, IOException {
+    public void checkStudentCourseRelation_ShoudReturnFalse_WhenResultsetReturnFalse() throws SQLException, IOException {
 
         Mockito.when(resultSet.next()).thenReturn(false);
 
@@ -232,4 +236,10 @@ public class SchoolDaoTest {
         Assert.assertEquals(expectedFalse, dao.checkStudentCourseRelation(testId, testCourseName));
     }
 
+    @Test
+    public void generateTestData_verifyMockBehavior() throws SQLException, IOException {
+        dao.generateTestData(testData);
+        Mockito.verify(testData).generateNewDataTables();
+        Mockito.verify(testData).generateTestData();
+    }
 }

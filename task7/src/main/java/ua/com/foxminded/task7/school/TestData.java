@@ -19,7 +19,8 @@ import ua.com.foxminded.task7.dao.SingleConnection;
 
 public class TestData {
     private static List<String> courseNames = new ArrayList<>();
-    
+    SingleConnection singleConnection = SingleConnection.getInstance();
+
     static {
         courseNames.add("biology");
         courseNames.add("chemistry");
@@ -29,12 +30,10 @@ public class TestData {
         courseNames.add("humanities");
         courseNames.add("literature");
         courseNames.add("composition");
-        courseNames.add("history");             
+        courseNames.add("history");
     }
-    
-    SingleConnection singleConnection = SingleConnection.getInstance();
 
-    public void generateNewDataTables() throws SQLException, IOException{
+    public void generateNewDataTables() throws SQLException, IOException {
         String scriptName = "generateTableScript.sql";
         try (Connection connection = singleConnection.getConnection();
                 Statement statement = connection.createStatement();

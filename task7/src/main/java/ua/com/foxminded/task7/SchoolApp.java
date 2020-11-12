@@ -7,6 +7,7 @@ import java.sql.SQLException;
 
 import ua.com.foxminded.task7.dao.SchoolDao;
 import ua.com.foxminded.task7.dao.SingleConnection;
+import ua.com.foxminded.task7.school.TestData;
 import ua.com.foxminded.task7.ui.SchoolUserDialog;
 
 public class SchoolApp {
@@ -16,9 +17,10 @@ public class SchoolApp {
 
         SchoolDao school = new SchoolDao(singleConnection);
         SchoolUserDialog schoolUserDialog = new SchoolUserDialog();
+        TestData testData = new TestData();
 
         try {
-            school.generateTestData();
+            school.generateTestData(testData);
             schoolUserDialog.getAppMenu();
         } catch (SQLException e) {
             System.err.println("Can't read the query \n" + e.getMessage());

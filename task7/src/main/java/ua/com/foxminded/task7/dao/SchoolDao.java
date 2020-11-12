@@ -5,10 +5,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.IllegalFormatException;
-
-import org.apache.commons.lang3.StringUtils;
 
 import ua.com.foxminded.task7.school.Student;
 import ua.com.foxminded.task7.school.TestData;
@@ -20,8 +16,7 @@ public class SchoolDao {
         this.singleConnection = connection;
     }
 
-    public void generateTestData() throws IOException, SQLException {
-        TestData testData = new TestData();
+    public void generateTestData(TestData testData) throws IOException, SQLException {
         testData.generateNewDataTables();
         testData.generateTestData();
     }

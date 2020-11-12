@@ -15,7 +15,7 @@ public class SingleConnection {
         if (instance == null) {
             instance = new SingleConnection();
         }
-        
+
         return instance;
     }
 
